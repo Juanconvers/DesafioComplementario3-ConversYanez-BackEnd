@@ -53,6 +53,14 @@ export const testJWT = async (req, res) => {
         res.status(200).send(req.user)
 }
 
+export const restorePassword = async (req, res) => {
+    
+    console.log(req.user.email)
+
+    res.status(200).send("Ok")
+
+
+}
 
 
 // sessionRouter.get('/current', passport.authenticate('jwt'), (req, res) => {
