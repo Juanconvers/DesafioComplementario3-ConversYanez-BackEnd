@@ -1,4 +1,5 @@
 import passport from "passport";
+import { sendEmailRecoverPassword } from "../utils/nodemailer";
 
 export const login = async (req, res) => {
     try {
@@ -54,9 +55,8 @@ export const testJWT = async (req, res) => {
 }
 
 export const restorePassword = async (req, res) => {
-    
-    console.log(req.user.email)
-
+    const {email} = req.body
+    sendEmailRecoverPassword(email, "https://www.ostercolombia.com/")
     res.status(200).send("Ok")
 
 
