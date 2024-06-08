@@ -1,8 +1,9 @@
 import { Router } from "express";
 import passport from "passport";
-import { login, register, sessionGithub, logout, testJWT, restorePassword } from "../controllers/sessionController.js";
-const sessionRouter = Router()
+import { login, register, sessionGithub, logout, testJWT, sendEmailPassword, recoverPassword } from "../controllers/sessionController.js";
 
+
+const sessionRouter = Router()
 
 sessionRouter.get('/login', passport.authenticate('login'), login)
 
@@ -16,7 +17,10 @@ sessionRouter.get('/logout', logout)
 
 sessionRouter.get('/testJWT', passport.authenticate('jwt', { session: false }), testJWT)
 
-sessionRouter.post('/recoverPassword', passport.authenticate('jwt', { session: false }), restorePassword)
+sessionRouter.post('/sendEmailPassword', sendEmailPassword)
+
+sessionRouter.post('/reset-password?:token', recoverPassword)
+
 
 export default sessionRouter
 

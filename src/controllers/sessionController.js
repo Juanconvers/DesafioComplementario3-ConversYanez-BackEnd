@@ -1,5 +1,7 @@
-import passport from "passport";
-import { sendEmailRecoverPassword } from "../utils/nodemailer";
+import userModel from "../models/user.js"
+import { sendEmailRecoverPassword } from "../utils/nodemailer.js";
+import jwt from 'jsonwebtoken'
+import {validatePassword, createHash} from "../utils/bcrypt.js"
 
 export const login = async (req, res) => {
     try {
@@ -54,11 +56,52 @@ export const testJWT = async (req, res) => {
         res.status(200).send(req.user)
 }
 
-export const restorePassword = async (req, res) => {
-    const {email} = req.body
-    sendEmailRecoverPassword(email, "https://www.ostercolombia.com/")
-    res.status(200).send("Ok")
+export const recoverPassword = async (req, res) => {
+   const { token } = req.params
+   const { newPassword } = req.body
 
+   try{
+        const validateToken = jwt.verify( token,"coder")
+        const user = await userModel.find({email: validateToken.userEmail})
+        if(user){
+            if(!validatePassword(newPassword, user.password)){
+                const hashPassword = createHash(newPassword)
+                user.password = hashPassword
+                const resultado = await userModel.findByIdAndUpdate(user._id, user)
+                console.log(resultado)
+                res.status(200).send("Contraseña modificada correctamente")
+            }else{
+                //iguales contraseñas coinciden
+                res.status(400).send("La contraseña no puede ser identificada")
+
+            }
+        }else{ 
+            res.status(404).send("Usuario no encontrado")
+        }
+   }catch (e){
+        res.status(500).send(e)
+   }
+    
+}
+
+export const sendEmailPassword = async (req, res) => {
+    
+    
+    try{
+        const {email} = req.body
+        const user = await userModel.find({email: email}) 
+        
+        if (user){
+            const token = jwt.sign({userEmail: email}, "coder", {expiresIn: '1h'})
+            const resetLink = `http://localhost:11000/api/session/reset-password?token=${token}`
+            sendEmailRecoverPassword(email, resetLink)
+            res.status(200).send("Email enviado satisfactoriamente") 
+        }else{
+            res.status(404).send("Usuario No encontrado")
+        }
+    }catch (e){
+        res.status(500).send(e)
+    }
 
 }
 
