@@ -61,7 +61,7 @@ export const recoverPassword = async (req, res) => {
    const { newPassword } = req.body
 
    try{
-        const validateToken = jwt.verify( token,"coder")
+        const validateToken = jwt.verify( token.substr(6,),"coder")
         const user = await userModel.find({email: validateToken.userEmail})
         if(user){
             if(!validatePassword(newPassword, user.password)){
@@ -79,6 +79,10 @@ export const recoverPassword = async (req, res) => {
             res.status(404).send("Usuario no encontrado")
         }
    }catch (e){
+        console.log(e)
+        if(e?.message == 'jwt.expired'){
+            res.status(400).send("El tiempo para recuperar la contraseña ha expirado. Use nuevo token")
+        }
         res.status(500).send(e)
    }
     
